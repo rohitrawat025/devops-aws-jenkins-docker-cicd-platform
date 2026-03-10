@@ -1,67 +1,80 @@
-# Infra  CI/CD Sowcase
+# DevOps CI/CD Portfolio Platform
 
-Production-grade DevOps pipeline deploying a containerized Spring Boot portfolio application on AWS using Jenkins distributed architecture.
+A production-style DevOps project demonstrating automated infrastructure provisioning, containerized application deployment, and CI/CD pipeline implementation using AWS, Terraform, Jenkins, Docker, and Nginx.
+
+---
 
 ## Architecture
 
 Developer → GitHub → Jenkins Master → Jenkins Agent → Docker Compose → Nginx → Spring Boot → MySQL
 
-## Technologies
+---
 
-- AWS EC2
-- Terraform
-- Jenkins Master-Agent
-- Docker
-- Docker Compose
-- Nginx
-- Spring Boot
-- MySQL
-- GitHub Webhooks
+## Technologies Used
 
-## Infrastructure
+* AWS EC2
+* Terraform
+* Jenkins (Master–Agent architecture)
+* Docker
+* Docker Compose
+* Nginx Reverse Proxy
+* Spring Boot
+* MySQL
+* GitHub Webhooks
+* Linux
 
-Terraform provisions:
+---
 
-- VPC
-- Subnet
-- Internet Gateway
-- Route Tables
-- Security Groups
-- Jenkins Master EC2
-- Jenkins Agent EC2
-- Elastic IPs
+## Infrastructure Provisioning
 
-## Containers
+Terraform automatically provisions:
 
-The Jenkins Agent runs 3 containers:
+* VPC
+* Subnet
+* Internet Gateway
+* Route Tables
+* Security Groups
+* Jenkins Master EC2
+* Jenkins Agent EC2
+* Elastic IPs
 
-- MySQL
-- Spring Boot Application
-- Nginx Reverse Proxy
+---
 
-## CI/CD Flow
+## CI/CD Workflow
 
-1 Developer pushes code to GitHub  
-2 GitHub triggers Jenkins webhook  
-3 Jenkins pipeline executes on agent  
-4 Docker images are built  
-5 Containers are deployed with Docker Compose  
-6 Nginx exposes frontend and backend  
+1. Developer pushes code to GitHub
+2. GitHub webhook triggers Jenkins
+3. Jenkins pipeline runs on agent node
+4. Docker images are built
+5. Containers are deployed using Docker Compose
+6. Nginx exposes application to the internet
+
+---
+
+## Container Architecture
+
+The Jenkins agent runs three containers:
+
+* MySQL Database
+* Spring Boot Application
+* Nginx Reverse Proxy
+
+---
 
 ## Application URLs
 
 Frontend
-http://SERVER_IP
 
+http://SERVER_IP:81
 
 Projects page
-http://SERVER_IP/projects
 
+http://SERVER_IP:81/projects
 
-Backend API
-http://SERVER_IP/api
-
+---
 
 ## Author
-Rohit Rawat  
-DevOps Trainee Engineer
+
+Rohit Rawat
+DevOps Engineer
+AWS | Docker | Jenkins | Terraform | Linux
