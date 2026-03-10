@@ -1,11 +1,15 @@
-CREATE DATABASE portfolio;
+CREATE DATABASE IF NOT EXISTS portfolio;
 
 USE portfolio;
 
-CREATE TABLE profile(
+-- ===============================
+-- Profile Table
+-- ===============================
+
+CREATE TABLE IF NOT EXISTS profile(
 
 id INT PRIMARY KEY AUTO_INCREMENT,
-name VARCHAR(100),
+name VARCHAR(100) NOT NULL,
 title VARCHAR(200),
 summary TEXT,
 email VARCHAR(100),
@@ -13,21 +17,34 @@ linkedin VARCHAR(200)
 
 );
 
-CREATE TABLE skill(
+-- ===============================
+-- Skill Table
+-- ===============================
+
+CREATE TABLE IF NOT EXISTS skill(
 
 id INT PRIMARY KEY AUTO_INCREMENT,
-skill_name VARCHAR(100)
+skill_name VARCHAR(100) NOT NULL
 
 );
 
-CREATE TABLE project(
+-- ===============================
+-- Project Table
+-- ===============================
+
+CREATE TABLE IF NOT EXISTS project(
 
 id INT PRIMARY KEY AUTO_INCREMENT,
-name VARCHAR(200),
+name VARCHAR(200) NOT NULL,
+github_url VARCHAR(500),
 description TEXT,
 technology VARCHAR(200)
 
 );
+
+-- ===============================
+-- Insert Profile
+-- ===============================
 
 INSERT INTO profile
 (name,title,summary,email,linkedin)
@@ -37,7 +54,11 @@ VALUES
 'DevOps Engineer | AWS | Docker | Jenkins | Terraform',
 'DevOps engineer experienced in CI/CD, containerization, AWS infrastructure and automation.',
 'rawatrohit.wrk.25@gmail.com',
-'linkedin.com/in/rohit-rawat');
+'https://linkedin.com/in/rohit-rawat');
+
+-- ===============================
+-- Insert Skills
+-- ===============================
 
 INSERT INTO skill(skill_name) VALUES
 ('AWS'),
@@ -48,17 +69,30 @@ INSERT INTO skill(skill_name) VALUES
 ('Nginx'),
 ('Git');
 
-INSERT INTO project(name,description,technology)
+-- ===============================
+-- Insert Projects
+-- ===============================
+
+INSERT INTO project(name,github_url,description,technology)
 
 VALUES
-('Jenkins Master Agent CI/CD',
+(
+'Jenkins Master Agent CI/CD',
+'https://github.com/rohitrawat025/devops-aws-jenkins-docker-cicd-platform',
 'Implemented Jenkins distributed pipeline on AWS EC2 with automated Docker deployment',
-'Jenkins, Docker, AWS'),
+'Jenkins, Docker, AWS'
+),
 
-('Spring Boot Docker Deployment',
+(
+'Spring Boot Docker Deployment',
+'https://github.com/rohitrawat025/springboot-docker-deployment',
 'Containerized Java application with Docker and Nginx reverse proxy',
-'Docker, Nginx, Spring Boot'),
+'Docker, Nginx, Spring Boot'
+),
 
-('Terraform AWS Infrastructure',
+(
+'Terraform AWS Infrastructure',
+'https://github.com/rohitrawat025/aws-terraform-infrastructure',
 'Provisioned VPC, EC2, IAM and networking infrastructure using Terraform',
-'AWS, Terraform');
+'AWS, Terraform'
+);

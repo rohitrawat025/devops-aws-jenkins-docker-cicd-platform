@@ -1,71 +1,99 @@
 pipeline {
-    agent { label 'rohit-agent-1' }
 
-    environment {
-        DOCKER_IMAGE = "portfolio-app"
-        DOCKER_COMPOSE_FILE = "docker/docker-compose.yml"
-        REPO_URL = "https://github.com/rohitrawat025/devops-aws-jenkins-docker-cicd-platform.git"
-    }
+    agent any
 
     stages {
+
         stage('Cleanup') {
             steps {
-                echo 'Cleaning up workspace...'
+                echo "Cleaning workspace..."
                 deleteDir()
             }
         }
 
         stage('Checkout') {
             steps {
-                // Fixed: Using your actual repository URL and credentials ID from logs
-                git branch: 'master', 
-                    url: "${env.REPO_URL}",
-                    credentialsId: '77a0a523-5d22-4db6-8793-bf409fa1d433'
+                git credentialsId: 'github-token',
+                url: 'https://github.com/rohitrawat025/devops-aws-jenkins-docker-cicd-platform.git',
+                branch: 'master'
             }
         }
 
-        stage('Build & Test') {
+        stage('Build Application') {
             steps {
-                echo 'Building Application...'
-                // If you have a pom.xml, you might run: sh 'mvn clean package -DskipTests'
-                sh 'ls -R' 
+                echo "Building Spring Boot App..."
+                sh 'ls -R'
             }
         }
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker Images...'
-                sh "docker compose -f ${env.DOCKER_COMPOSE_FILE} build"
+                echo "Building Docker Images..."
+                sh 'docker compose -f docker/docker-compose.yml build'
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Containers') {
             steps {
-                echo 'Deploying with Docker Compose...'
-                sh "docker compose -f ${env.DOCKER_COMPOSE_FILE} up -d"
+                echo "Starting Containers..."
+                sh 'docker compose -f docker/docker-compose.yml up -d'
             }
         }
 
-        stage('Verify') {
+        stage('Configure Nginx') {
             steps {
-                echo 'Verifying deployment...'
+                sh '''
+
+                echo "Creating nginx directories..."
+
+                docker exec portfolio-nginx mkdir -p /etc/nginx/sites-available
+                docker exec portfolio-nginx mkdir -p /etc/nginx/sites-enabled
+
+                echo "Ensuring nginx reads sites-enabled..."
+
+                docker exec portfolio-nginx sh -c "
+                grep -q 'sites-enabled' /etc/nginx/nginx.conf || \
+                sed -i '/include \\/etc\\/nginx\\/conf.d\\/\\*.conf;/a include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
+                "
+
+                echo "Enable site..."
+
+                docker exec portfolio-nginx ln -sf \
+                /etc/nginx/sites-available/nw-nginx.conf \
+                /etc/nginx/sites-enabled/nw-nginx.conf
+
+                echo "Reload nginx..."
+
+                docker exec portfolio-nginx nginx -t
+                docker exec portfolio-nginx nginx -s reload
+
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                echo "Checking running containers..."
                 sh 'docker ps'
-                // Check if the container is responding on port 8080 or 80
-                sh 'curl -I http://localhost || true'
+
+                echo "Testing nginx..."
+                sh 'curl -I http://localhost:81 || true'
             }
         }
+
     }
 
     post {
-        always {
-            echo 'Pipeline execution finished.'
-        }
+
         success {
-            echo 'Deployment successful!'
+            echo "Deployment successful!"
         }
+
         failure {
-            echo 'Deployment failed. Checking logs...'
-            sh "docker compose -f ${env.DOCKER_COMPOSE_FILE} logs || true"
+            echo "Deployment failed. Checking logs..."
+
+            sh 'docker compose -f docker/docker-compose.yml logs || true'
         }
+
     }
 }
