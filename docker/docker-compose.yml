@@ -1,86 +1,50 @@
-version: "3.9"
+version: "3.8"
 
 services:
 
-mysql:
+  portfolio-app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: portfolio-app
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - portfolio-network
+    depends_on:
+      - portfolio-db
 
-```
-image: mysql:8.0
-container_name: portfolio-mysql
+  portfolio-db:
+    image: mysql:8
+    container_name: portfolio-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: portfolio
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - portfolio-network
 
-restart: always
+  portfolio-nginx:
+    image: nginx:latest
+    container_name: portfolio-nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ../nginx/sites-available:/etc/nginx/sites-available
+    depends_on:
+      - portfolio-app
+    networks:
+      - portfolio-network
 
-environment:
-  MYSQL_ROOT_PASSWORD: root
-  MYSQL_DATABASE: portfolio
+networks:
+  portfolio-network:
 
 volumes:
-  - mysql-data:/var/lib/mysql
-  - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-ports:
-  - "3306:3306"
-
-networks:
-  - portfolio-network
-```
-
-app:
-
-```
-build:
-  context: ..
-  dockerfile: docker/Dockerfile
-
-container_name: portfolio-app
-
-restart: always
-
-depends_on:
-  - mysql
-
-environment:
-
-  SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/portfolio
-  SPRING_DATASOURCE_USERNAME: root
-  SPRING_DATASOURCE_PASSWORD: root
-
-ports:
-  - "8080:8080"
-
-networks:
-  - portfolio-network
-```
-
-nginx:
-
-```
-image: nginx:1.25
-container_name: portfolio-nginx
-
-restart: always
-
-depends_on:
-  - app
-
-ports:
-  - "80:80"
-
-volumes:
-
-  # nginx configuration directories
-  - ../nginx/sites-available:/etc/nginx/sites-available
-  - ../nginx/sites-enabled:/etc/nginx/sites-enabled
-
-networks:
-  - portfolio-network
-```
-
-volumes:
-
-mysql-data:
-
-networks:
-
-portfolio-network:
-driver: bridge
+  db-data:
