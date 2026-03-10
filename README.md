@@ -25,9 +25,9 @@ Developer → GitHub → Jenkins Master → Jenkins Agent → Docker Compose →
 
 ---
 
-## Infrastructure Provisioning
+## Infrastructure Provisioning 
 
-Terraform automatically provisions:
+Terraform automatically provisions:-
 
 * VPC
 * Subnet
