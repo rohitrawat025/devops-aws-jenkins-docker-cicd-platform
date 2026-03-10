@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<title>Projects</title>
+
+<link rel="stylesheet" th:href="@{/css/style.css}">
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<h1>My DevOps Projects</h1>
+
+<nav>
+<a href="/">Home</a>
+<a href="/projects">Projects</a>
+</nav>
+
+</header>
+
+
+<section class="projects-page">
+
+<div class="project-container">
+
+<div class="project-card" th:each="project : ${projects}">
+
+<h2 th:text="${project.title}">Project</h2>
+
+<p th:text="${project.description}">Description</p>
+
+<p>
+<b>Technology:</b>
+<span th:text="${project.technology}">AWS, Docker</span>
+</p>
+
+<a th:href="${project.githubUrl}" target="_blank">Github Repository</a>
+
+</div>
+
+</div>
+
+</section>
+
+
+<footer>
+
+<p>© 2026 DevOps Portfolio</p>
+
+</footer>
+
+
+</body>
+
+</html>

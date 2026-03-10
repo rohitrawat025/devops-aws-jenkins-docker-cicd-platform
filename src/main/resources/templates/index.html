@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<title>DevOps Portfolio</title>
+
+<link rel="stylesheet" th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+<header>
+
+<h1>DevOps Engineer Portfolio</h1>
+
+<nav>
+<a href="/">Home</a>
+<a href="/projects">Projects</a>
+</nav>
+
+</header>
+
+
+<section class="hero">
+
+<h2 th:text="${profile.name}">Name</h2>
+
+<p th:text="${profile.title}">DevOps Engineer</p>
+
+</section>
+
+
+<section class="about">
+
+<h2>About Me</h2>
+
+<p th:text="${profile.summary}">
+Passionate DevOps engineer with experience in AWS, CI/CD and automation.
+</p>
+
+</section>
+
+
+
+<section class="skills">
+
+<h2>Skills</h2>
+
+<div class="skill-container">
+
+<div class="skill-card" th:each="skill : ${skills}">
+<p th:text="${skill.skillName}">AWS</p>
+</div>
+
+</div>
+
+</section>
+
+
+
+<section class="projects-preview">
+
+<h2>Projects</h2>
+
+<div class="project-container">
+
+<div class="project-card" th:each="project : ${projects}">
+
+<h3 th:text="${project.name}">Project Name</h3>
+
+<p th:text="${project.description}">
+Project Description
+</p>
+
+<p>
+<b>Technology:</b>
+<span th:text="${project.technology}">AWS, Docker</span>
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<footer>
+
+<p>© 2026 DevOps Portfolio</p>
+
+</footer>
+
+</body>
+</html>
