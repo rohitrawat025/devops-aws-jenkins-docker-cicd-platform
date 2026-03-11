@@ -6,6 +6,10 @@ pipeline {
         githubPush()
     }
 
+    environment {
+        COMPOSE_FILE = "docker/docker-compose.yml"
+    }
+
     stages {
 
         stage('Clean Workspace') {
@@ -14,7 +18,7 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'master',
                 url: 'https://github.com/rohitrawat025/devops-aws-jenkins-docker-cicd-platform.git'
@@ -28,39 +32,52 @@ pipeline {
 
                 cp nginx/sites-available/nw-nginx.conf nginx/sites-enabled/
 
+                echo "Nginx configuration prepared"
+
                 ls -l nginx/sites-enabled
                 '''
             }
         }
 
-        stage('Build Application') {
+        stage('Build Docker Images') {
             steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                sh 'docker compose -f docker/docker-compose.yml build'
+                sh '''
+                docker compose -f $COMPOSE_FILE build
+                '''
             }
         }
 
         stage('Deploy Containers') {
             steps {
                 sh '''
-                docker compose -f docker/docker-compose.yml down || true
-                docker compose -f docker/docker-compose.yml up -d
+                docker compose -f $COMPOSE_FILE down || true
+                docker compose -f $COMPOSE_FILE up -d
                 '''
             }
         }
 
-        stage('Verify') {
+        stage('Verify Deployment') {
             steps {
                 sh '''
+                echo "Running containers:"
                 docker ps
-                curl http://localhost:81 || true
+
+                echo "Testing application..."
+                curl -I http://localhost:81 || true
                 '''
             }
+        }
+
+    }
+
+    post {
+
+        success {
+            echo "Deployment successful!"
+        }
+
+        failure {
+            echo "Pipeline failed!"
         }
 
     }

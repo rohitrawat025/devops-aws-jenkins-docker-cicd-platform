@@ -17,7 +17,7 @@ services:
 
   springboot:
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
     container_name: portfolio-app
     restart: always
