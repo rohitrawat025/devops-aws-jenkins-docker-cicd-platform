@@ -77,4 +77,4 @@ http://SERVER_IP:81/projects
 
 Rohit Rawat
 DevOps Engineer
-AWS | Docker | Jenkins | Terraform | Linux
+AWS | Docker | Docker Compose | Jenkins | Terraform | Linux
