@@ -8,7 +8,7 @@ pipeline {
 
     stages {
 
-        stage('Cleanup') {
+        stage('Clean Workspace') {
             steps {
                 deleteDir()
             }
@@ -18,6 +18,18 @@ pipeline {
             steps {
                 git branch: 'master',
                 url: 'https://github.com/rohitrawat025/devops-aws-jenkins-docker-cicd-platform.git'
+            }
+        }
+
+        stage('Prepare Nginx Config') {
+            steps {
+                sh '''
+                mkdir -p nginx/sites-enabled
+
+                cp nginx/sites-available/nw-nginx.conf nginx/sites-enabled/
+
+                ls -l nginx/sites-enabled
+                '''
             }
         }
 
@@ -35,17 +47,21 @@ pipeline {
 
         stage('Deploy Containers') {
             steps {
-                sh 'docker compose -f docker/docker-compose.yml up -d'
+                sh '''
+                docker compose -f docker/docker-compose.yml down || true
+                docker compose -f docker/docker-compose.yml up -d
+                '''
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Verify') {
             steps {
-                sh 'docker ps'
-                sh 'curl http://localhost:81 || true'
+                sh '''
+                docker ps
+                curl http://localhost:81 || true
+                '''
             }
         }
 
     }
-
 }
