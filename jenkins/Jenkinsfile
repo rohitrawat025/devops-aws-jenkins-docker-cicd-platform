@@ -8,9 +8,19 @@ pipeline {
 
     environment {
         COMPOSE_FILE = "docker/docker-compose.yml"
+        WORKSPACE_DIR = "/home/ubuntu/workspace/${JOB_NAME}"
     }
 
     stages {
+
+        stage('Fix Workspace Permissions') {
+            steps {
+                sh '''
+                echo "Fixing workspace permissions..."
+                sudo chown -R ubuntu:ubuntu $WORKSPACE_DIR || true
+                '''
+            }
+        }
 
         stage('Clean Workspace') {
             steps {
@@ -20,21 +30,46 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'master',
-                url: 'https://github.com/rohitrawat025/devops-aws-jenkins-docker-cicd-platform.git'
+                checkout scm
+            }
+        }
+
+        stage('Verify Repository Structure') {
+            steps {
+                sh '''
+                echo "Listing repository structure"
+                ls -la
+                ls -la docker
+                '''
             }
         }
 
         stage('Prepare Nginx Config') {
             steps {
                 sh '''
+                echo "Preparing nginx configuration..."
+
                 mkdir -p nginx/sites-enabled
 
                 cp nginx/sites-available/nw-nginx.conf nginx/sites-enabled/
 
-                echo "Nginx configuration prepared"
+                echo "Nginx config prepared"
 
                 ls -l nginx/sites-enabled
+                '''
+            }
+        }
+
+        stage('Docker Cleanup') {
+            steps {
+                sh '''
+                echo "Stopping existing containers..."
+
+                docker compose -f $COMPOSE_FILE down || true
+
+                echo "Removing unused images..."
+
+                docker system prune -f || true
                 '''
             }
         }
@@ -42,6 +77,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh '''
+                echo "Building Docker images..."
+
                 docker compose -f $COMPOSE_FILE build
                 '''
             }
@@ -50,8 +87,19 @@ pipeline {
         stage('Deploy Containers') {
             steps {
                 sh '''
-                docker compose -f $COMPOSE_FILE down || true
+                echo "Starting containers..."
+
                 docker compose -f $COMPOSE_FILE up -d
+                '''
+            }
+        }
+
+        stage('Wait For Application') {
+            steps {
+                sh '''
+                echo "Waiting for Spring Boot to start..."
+
+                sleep 20
                 '''
             }
         }
@@ -63,6 +111,7 @@ pipeline {
                 docker ps
 
                 echo "Testing application..."
+
                 curl -I http://localhost:81 || true
                 '''
             }
@@ -74,6 +123,11 @@ pipeline {
 
         success {
             echo "Deployment successful!"
+
+            sh '''
+            echo "Application URL:"
+            curl -s ifconfig.me
+            '''
         }
 
         failure {
@@ -81,4 +135,5 @@ pipeline {
         }
 
     }
+
 }
