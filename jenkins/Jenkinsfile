@@ -1,6 +1,6 @@
 pipeline {
 
-    agent { label 'agent-jnk' }
+    agent { label 'rohit-agent-1' }
 
     triggers {
         githubPush()
