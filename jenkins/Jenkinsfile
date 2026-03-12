@@ -8,19 +8,9 @@ pipeline {
 
     environment {
         COMPOSE_FILE = "docker/docker-compose.yml"
-        WORKSPACE_DIR = "/home/ubuntu/workspace/${JOB_NAME}"
     }
 
     stages {
-
-        stage('Fix Workspace Permissions') {
-            steps {
-                sh '''
-                echo "Fixing workspace permissions..."
-                sudo chown -R ubuntu:ubuntu $WORKSPACE_DIR || true
-                '''
-            }
-        }
 
         stage('Clean Workspace') {
             steps {
@@ -34,12 +24,11 @@ pipeline {
             }
         }
 
-        stage('Verify Repository Structure') {
+        stage('Verify Repository') {
             steps {
                 sh '''
-                echo "Listing repository structure"
+                echo "Repository structure:"
                 ls -la
-                ls -la docker
                 '''
             }
         }
@@ -47,29 +36,21 @@ pipeline {
         stage('Prepare Nginx Config') {
             steps {
                 sh '''
-                echo "Preparing nginx configuration..."
-
                 mkdir -p nginx/sites-enabled
-
                 cp nginx/sites-available/nw-nginx.conf nginx/sites-enabled/
-
-                echo "Nginx config prepared"
-
-                ls -l nginx/sites-enabled
                 '''
             }
         }
 
-        stage('Docker Cleanup') {
+        stage('Full Docker Cleanup') {
             steps {
                 sh '''
-                echo "Stopping existing containers..."
+                echo "Stopping containers..."
 
-                docker compose -f $COMPOSE_FILE down || true
+                docker compose -f $COMPOSE_FILE down -v || true
 
                 echo "Removing unused images..."
-
-                docker system prune -f || true
+                docker system prune -af || true
                 '''
             }
         }
@@ -77,8 +58,6 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 sh '''
-                echo "Building Docker images..."
-
                 docker compose -f $COMPOSE_FILE build
                 '''
             }
@@ -87,8 +66,6 @@ pipeline {
         stage('Deploy Containers') {
             steps {
                 sh '''
-                echo "Starting containers..."
-
                 docker compose -f $COMPOSE_FILE up -d
                 '''
             }
@@ -97,22 +74,21 @@ pipeline {
         stage('Wait For Application') {
             steps {
                 sh '''
-                echo "Waiting for Spring Boot to start..."
+                echo "Waiting for application..."
 
-                sleep 20
-                '''
-            }
-        }
+                for i in {1..20}
+                do
+                    if curl -s http://localhost:81 > /dev/null; then
+                        echo "Application is ready"
+                        exit 0
+                    fi
 
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                echo "Running containers:"
-                docker ps
+                    echo "Waiting..."
+                    sleep 5
+                done
 
-                echo "Testing application..."
-
-                curl -I http://localhost:81 || true
+                echo "Application failed to start"
+                exit 1
                 '''
             }
         }
@@ -122,8 +98,6 @@ pipeline {
     post {
 
         success {
-            echo "Deployment successful!"
-
             sh '''
             echo "Application URL:"
             curl -s ifconfig.me
@@ -131,7 +105,12 @@ pipeline {
         }
 
         failure {
-            echo "Pipeline failed!"
+            sh '''
+            echo "Deployment failed"
+
+            docker ps -a
+            docker logs portfolio-app || true
+            '''
         }
 
     }

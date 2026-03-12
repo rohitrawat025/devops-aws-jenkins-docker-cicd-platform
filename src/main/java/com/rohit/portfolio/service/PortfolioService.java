@@ -28,7 +28,10 @@ public class PortfolioService {
     }
 
     public Profile getProfile() {
-        return profileRepo.findAll().get(0);
+        return profileRepo.findAll()
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
     public List<Project> getProjects() {

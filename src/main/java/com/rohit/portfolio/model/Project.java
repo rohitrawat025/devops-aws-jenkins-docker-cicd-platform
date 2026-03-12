@@ -12,6 +12,7 @@ public class Project {
 
     private String name;
 
+    @Column(name = "github_url")
     private String githubUrl;
 
     @Column(length = 2000)
@@ -19,46 +20,17 @@ public class Project {
 
     private String technology;
 
-    public Project() {
-    }
+    public Long getId() { return id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getGithubUrl() { return githubUrl; }
+    public void setGithubUrl(String githubUrl) { this.githubUrl = githubUrl; }
 
-    public String getName() {
-        return name;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGithubUrl() {
-        return githubUrl;
-    }
-
-    public void setGithubUrl(String githubUrl) {
-        this.githubUrl = githubUrl;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getTechnology() {
-        return technology;
-    }
-
-    public void setTechnology(String technology) {
-        this.technology = technology;
-    }
+    public String getTechnology() { return technology; }
+    public void setTechnology(String technology) { this.technology = technology; }
 }

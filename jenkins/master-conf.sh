@@ -35,7 +35,7 @@ sudo apt install openjdk-17-jdk -y
 sudo apt install jenkins -y
 sudo systemctl start jenkins
 sudo systemctl enable jenkins
-sudo susyemctl status jenkins
+sudo systemctl status jenkins
 
 #verufy 
 java --version 
